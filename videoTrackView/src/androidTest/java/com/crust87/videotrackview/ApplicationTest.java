@@ -1,4 +1,4 @@
-package com.crust87.videoscrollbar;
+package com.crust87.videotrackview;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

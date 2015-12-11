@@ -1,4 +1,4 @@
-package com.crust87.videoscrollbarsample;
+package com.crust87.videotrackviewsample;
 
 import org.junit.Test;
 

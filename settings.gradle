@@ -1,1 +1,1 @@
-include ':app', ':videosSrollBar'
+include ':app', ':videoTrackView'
