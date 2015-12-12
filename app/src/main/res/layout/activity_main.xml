@@ -18,10 +18,11 @@
             app:ratio_height="1"
             app:ratio_width="1" />
 
-        <com.crust87.videotrackview.VideoTrackView
-            android:id="@+id/videoTrackView"
+        <FrameLayout
+            android:id="@+id/layoutTrackView"
             android:layout_width="match_parent"
-            android:layout_height="88dp" />
+            android:layout_height="88dp">
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout

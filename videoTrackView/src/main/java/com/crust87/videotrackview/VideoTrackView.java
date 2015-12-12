@@ -1,5 +1,7 @@
 package com.crust87.videotrackview;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -10,14 +12,11 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.util.ArrayList;
 
 public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callback {
 	private static enum ACTION_TYPE {anchor, normal, idle}	// touch event action type
@@ -28,7 +27,6 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 	// Components for SurfaceView
 	private SurfaceHolder mHolder;
-	private Context mContext;
 
 	// Components
 	private ArrayList<Bitmap> mThumbnailList;
@@ -69,43 +67,22 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	public VideoTrackView(Context context) {
 		super(context);
 
-		mContext = context;
-
-		init();
-	}
-
-	public VideoTrackView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-
-		mContext = context;
-
-		init();
-	}
-
-	public VideoTrackView(Context context, AttributeSet attrs, int defStyleAttr) {
-		super(context, attrs, defStyleAttr);
-
-		mContext = context;
-
-		init();
-	}
-
-	private void init() {
 		mHolder = getHolder();
 		mHolder.addCallback(this);
 
-		dp1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, mContext.getResources().getDisplayMetrics());
+		dp1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
 		dp2 = dp1 * 2;
 		dp4 = dp1 * 4;
 		dp12 = dp1 * 12;
 		dp18 = dp1 * 18;
 		dp80 = dp1 * 80;
 
-		mThumbnailList = new ArrayList<>();
+		mThumbnailList = new ArrayList<Bitmap>();
 		mBackgroundPaint = new Paint();
 		mBackgroundPaint.setColor(Color.parseColor("#222222"));
 		mDisablePaint = new Paint(Color.parseColor("#000000"));
 		mDisablePaint.setAlpha(192);
+		mAnchor = new Anchor();
 		setWillNotDraw(false);
 	}
 
@@ -184,6 +161,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		}
 
 		retriever.release();
+		invalidate();
 		return true;
 	}
 
@@ -277,6 +255,29 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mTrack.draw(canvas);
 		canvas.drawRect(mDisableRect, mDisablePaint);
 		mAnchor.draw(canvas);
+	}
+
+	private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
+		int sourceWidth = source.getWidth();
+		int sourceHeight = source.getHeight();
+
+		float xScale = (float) newWidth / sourceWidth;
+		float yScale = (float) newHeight / sourceHeight;
+		float scale = Math.max(xScale, yScale);
+
+		float scaledWidth = scale * sourceWidth;
+		float scaledHeight = scale * sourceHeight;
+
+		float left = (newWidth - scaledWidth) / 2;
+		float top = (newHeight - scaledHeight) / 2;
+
+		RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
+
+		Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
+		Canvas canvas = new Canvas(dest);
+		canvas.drawBitmap(source, null, targetRect, null);
+
+		return dest;
 	}
 
 	public void setOnUpdatePositionListener(OnUpdatePositionListener pOnUpdatePositionListener) {
@@ -386,27 +387,4 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		}
 	}
 
-	// create bitmap to center crop in bound
-	public static Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
-		int sourceWidth = source.getWidth();
-		int sourceHeight = source.getHeight();
-
-		float xScale = (float) newWidth / sourceWidth;
-		float yScale = (float) newHeight / sourceHeight;
-		float scale = Math.max(xScale, yScale);
-
-		float scaledWidth = scale * sourceWidth;
-		float scaledHeight = scale * sourceHeight;
-
-		float left = (newWidth - scaledWidth) / 2;
-		float top = (newHeight - scaledHeight) / 2;
-
-		RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
-
-		Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
-		Canvas canvas = new Canvas(dest);
-		canvas.drawBitmap(source, null, targetRect, null);
-
-		return dest;
-	}
 }

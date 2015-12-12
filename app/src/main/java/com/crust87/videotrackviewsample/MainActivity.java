@@ -9,6 +9,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import com.crust87.videotrackview.VideoTrackView;
 import com.mabi87.videocropview.VideoCropView;
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Layout Components
     private VideoCropView mVideoCropView;
+    private FrameLayout mLayoutTrackView;
     private VideoTrackView mVideoTrackView;
 
     // Attributes
@@ -32,7 +34,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mVideoCropView = (VideoCropView) findViewById(R.id.videoCropView);
-        mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
+        mLayoutTrackView = (FrameLayout) findViewById(R.id.layoutTrackView);
+        mVideoTrackView = new VideoTrackView(getApplication());
+        mLayoutTrackView.addView(mVideoTrackView);
+        mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
+            @Override
+            public void onUpdatePositionStart() {
+                mVideoCropView.pause();
+            }
+
+            @Override
+            public void onUpdatePosition(int seek, int duration) {
+            }
+
+            @Override
+            public void onUpdatePositionEnd(int seek, int duration) {
+                mVideoCropView.seekTo(seek);
+                mVideoCropView.start();
+            }
+        });
     }
 
     private void bindEvent() {
