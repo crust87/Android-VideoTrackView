@@ -19,10 +19,16 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url 'https://dl.bintray.com/mabi87/maven/'
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.crust87:video-crop-view:1.0.0'
+    compile 'com.crust87:video-crop-view:1.0.1'
+    compile 'com.crust87:ffmpeg-executor:1.0.1'
     compile project(':videoTrackView')
-    compile 'com.crust87:ffmpeg-executer:1.0.0'
 }

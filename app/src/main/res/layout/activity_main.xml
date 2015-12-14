@@ -11,18 +11,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.mabi87.videocropview.VideoCropView
+        <com.crust87.videocropview.VideoCropView
             android:id="@+id/videoCropView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:ratio_height="1"
             app:ratio_width="1" />
 
-        <FrameLayout
-            android:id="@+id/layoutTrackView"
+        <com.crust87.videotrackview.VideoTrackView
+            android:id="@+id/videoTrackView"
             android:layout_width="match_parent"
-            android:layout_height="80dp">
-        </FrameLayout>
+            android:layout_height="80dp"
+            app:screen_duration="10000"
+            app:thumbnail_per_screen="6" />
     </LinearLayout>
 
     <LinearLayout

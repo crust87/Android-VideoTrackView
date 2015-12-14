@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VideoTrackView">
+        <attr name="screen_duration" format="float" />
+        <attr name="thumbnail_per_screen" format="integer" />
+    </declare-styleable>
+</resources>

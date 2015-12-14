@@ -1,6 +1,5 @@
 package com.crust87.videotrackviewsample;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
@@ -9,16 +8,14 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.FrameLayout;
 
+import com.crust87.videocropview.VideoCropView;
 import com.crust87.videotrackview.VideoTrackView;
-import com.mabi87.videocropview.VideoCropView;
 
 public class MainActivity extends AppCompatActivity {
 
     // Layout Components
     private VideoCropView mVideoCropView;
-    private FrameLayout mLayoutTrackView;
     private VideoTrackView mVideoTrackView;
 
     // Attributes
@@ -35,9 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mVideoCropView = (VideoCropView) findViewById(R.id.videoCropView);
-        mLayoutTrackView = (FrameLayout) findViewById(R.id.layoutTrackView);
-        mVideoTrackView = new VideoTrackView(getApplication());
-        mLayoutTrackView.addView(mVideoTrackView);
+        mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
     }
 
     private void bindEvent() {
@@ -52,17 +47,17 @@ public class MainActivity extends AppCompatActivity {
         mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
             @Override
             public void onUpdatePositionStart() {
-                mVideoCropView.pause();
+
             }
 
             @Override
-            public void onUpdatePosition(int seek, int duration) {
+            public void onUpdatePosition(int seek) {
+
             }
 
             @Override
-            public void onUpdatePositionEnd(int seek, int duration) {
-                mVideoCropView.seekTo(seek);
-                mVideoCropView.start();
+            public void onUpdatePositionEnd(int seek) {
+
             }
         });
     }
@@ -73,12 +68,10 @@ public class MainActivity extends AppCompatActivity {
             Uri selectedVideoUri = data.getData();
 
             originalPath = getRealPathFromURI(selectedVideoUri);
+            mVideoTrackView.setVideo(originalPath);
 
             mVideoCropView.setVideoURI(selectedVideoUri);
             mVideoCropView.seekTo(1);
-
-            mVideoTrackView.setVideo(originalPath);
-            mVideoTrackView.invalidate();
         }
     }
 
