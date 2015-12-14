@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         loadGUI();
+        bindEvent();
     }
 
     private void loadGUI() {
@@ -37,6 +38,17 @@ public class MainActivity extends AppCompatActivity {
         mLayoutTrackView = (FrameLayout) findViewById(R.id.layoutTrackView);
         mVideoTrackView = new VideoTrackView(getApplication());
         mLayoutTrackView.addView(mVideoTrackView);
+    }
+
+    private void bindEvent() {
+        mVideoCropView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mVideoCropView.start();
+            }
+        });
+
         mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
             @Override
             public void onUpdatePositionStart() {
@@ -50,16 +62,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onUpdatePositionEnd(int seek, int duration) {
                 mVideoCropView.seekTo(seek);
-                mVideoCropView.start();
-            }
-        });
-    }
-
-    private void bindEvent() {
-        mVideoCropView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-
-            @Override
-            public void onPrepared(MediaPlayer mp) {
                 mVideoCropView.start();
             }
         });

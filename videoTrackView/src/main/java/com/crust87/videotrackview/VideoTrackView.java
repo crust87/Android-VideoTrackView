@@ -12,6 +12,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -19,7 +20,7 @@ import android.view.SurfaceView;
 
 
 public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callback {
-	private static enum ACTION_TYPE {anchor, normal, idle}	// touch event action type
+	private static enum ACTION_TYPE {normal, idle}	// touch event action type
 
 	private float SCREEN_DURATION = 15000f;
 	private float MAX_DURATION = 15000f;	// maximum of duration
@@ -32,10 +33,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private ArrayList<Bitmap> mThumbnailList;
 	private Paint mBackgroundPaint;
 	private Rect mBackgroundRect;
-	private Paint mDisablePaint;
-	private Rect mDisableRect;
 	private Track mTrack;
-	private Anchor mAnchor;					// duration anchor
 
 	// Attributes
 	private int mWidth;						// view width
@@ -44,16 +42,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private int mVideoDurationWidth;		// video duration in pixel
 	private float secPerWidth;				// seconds per width
 	private int minWidth;					// minimum duration in pixel
-	private int maxWidth;					// maximum duration in pixel
 	private int secWidth;					// one second of width in pixel
 
-	// Layout Attribyte;
-	private int dp1;
-	private int dp2;
-	private int dp4;
-	private int dp12;
-	private int dp18;
-	private int dp80;
+	// Layout Attributes;
+	private int mTrackHeight;
 
 	// Working Variable;
 	private int currentPosition;			// current start position
@@ -70,19 +62,11 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mHolder = getHolder();
 		mHolder.addCallback(this);
 
-		dp1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics());
-		dp2 = dp1 * 2;
-		dp4 = dp1 * 4;
-		dp12 = dp1 * 12;
-		dp18 = dp1 * 18;
-		dp80 = dp1 * 80;
+        mTrackHeight = context.getResources().getDimensionPixelOffset(R.dimen.track_height);
 
 		mThumbnailList = new ArrayList<Bitmap>();
 		mBackgroundPaint = new Paint();
 		mBackgroundPaint.setColor(Color.parseColor("#222222"));
-		mDisablePaint = new Paint(Color.parseColor("#000000"));
-		mDisablePaint.setAlpha(192);
-		mAnchor = new Anchor();
 		setWillNotDraw(false);
 	}
 
@@ -96,19 +80,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 				}
 				pastX = event.getX();
 
-				// check event type
-				if(mAnchor.contains(event.getX())) {
-					actionType = ACTION_TYPE.anchor;
-				} else {
-					actionType = ACTION_TYPE.normal;
-				}
+                actionType = ACTION_TYPE.normal;
 			case MotionEvent.ACTION_MOVE:
 				// do event process
 				switch(actionType) {
-					case anchor:
-						updateAnchorPosition(event.getX() - pastX);
-						pastX = event.getX();
-						break;
 					case normal:
 						updateTrackPosition((int) (event.getX() - pastX));
 						pastX = event.getX();
@@ -148,20 +123,17 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		currentDuration = (mVideoDuration - currentPosition) > 8000 ? 8000 : (mVideoDuration - currentPosition);
 
 		mTrack.right = mVideoDurationWidth;
-		mAnchor.position = (int) (currentDuration * secPerWidth);
-		mDisableRect.left = (int) mAnchor.position;
 
 		// create thumbnail for draw track
 		for(int i = 0; i < mVideoDuration * 1000; i += 2000000) {
 			Bitmap thumbnail = retriever.getFrameAtTime(i);
 			if(thumbnail != null) {
-				mThumbnailList.add(scaleCenterCrop(thumbnail, secWidth, dp80));
+				mThumbnailList.add(scaleCenterCrop(thumbnail, secWidth, mTrackHeight));
 				thumbnail.recycle();
 			}
 		}
 
 		retriever.release();
-		invalidate();
 		return true;
 	}
 
@@ -189,33 +161,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		if(x < 0) {
 			int nextDuration = mVideoDuration - currentPosition;
 			currentDuration = nextDuration > currentDuration ? currentDuration : nextDuration;
-			mAnchor.position = (int) (currentDuration * secPerWidth);
-			mDisableRect.left = (int) mAnchor.position;
 		}
 
-		if(mOnUpdatePositionListener != null) {
-			mOnUpdatePositionListener.onUpdatePosition(currentPosition, currentDuration);
-		}
-
-		invalidate();
-	}
-
-	private void updateAnchorPosition(float x) {
-		// check next position in boundary
-		if(mAnchor.position + x < minWidth) {
-			x = minWidth - mAnchor.position;
-		}
-
-		if(mAnchor.position + x > mTrack.right) {
-			x = mTrack.right - mAnchor.position;
-		} else if(mAnchor.position + x > maxWidth) {
-			x = maxWidth - mAnchor.position;
-		}
-
-		mAnchor.position += x;
-		mDisableRect.left = (int) mAnchor.position;
-
-		currentDuration = (int) (mAnchor.position / secPerWidth);
 		if(mOnUpdatePositionListener != null) {
 			mOnUpdatePositionListener.onUpdatePosition(currentPosition, currentDuration);
 		}
@@ -234,13 +181,12 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mHeight = height;
 
 		secPerWidth = mWidth / SCREEN_DURATION;
+        mVideoDurationWidth = (int) (mVideoDuration * secPerWidth);
 		minWidth = (int) (MIN_DURATION * secPerWidth);
-		maxWidth = (int) (MAX_DURATION * secPerWidth);
 		secWidth = (int) (secPerWidth * 2000);
 
 		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
-		mTrack = new Track(0, dp4, 0, mHeight - dp4);
-		mDisableRect = new Rect(0, 0, mWidth, mHeight);
+		mTrack = new Track(0, 0, mVideoDurationWidth, mHeight);
 	}
 
 	@Override
@@ -253,8 +199,6 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		canvas.drawRect(mBackgroundRect, mBackgroundPaint);
 		mTrack.draw(canvas);
-		canvas.drawRect(mDisableRect, mDisablePaint);
-		mAnchor.draw(canvas);
 	}
 
 	private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
@@ -315,7 +259,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 			mTrackPaint.setColor(Color.parseColor("#000000"));
 			mTrackPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
 			mThumbnailPaint = new Paint();
-			mThumbnailPaint.setColor(Color.parseColor("#ffffff"));
+
 			mBitmapPaint = new Paint();
 
 			lineBoundLeft = -secWidth;
@@ -341,8 +285,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		}
 
 		private void drawBitmap() {
-			int i = 0;
-
+            int i = 0;
 			while(i < mThumbnailList.size()) {
 				int x = (int) (left + i * secWidth);
 
@@ -355,36 +298,12 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 				if(x > lineBoundRight) {
 					break;
 				}
-
 				// draw thumbnail it's if visible
 				mCanvas.drawBitmap(mThumbnailList.get(i), x, top, mThumbnailPaint);
 				i++;
 			}
 		}
 
-	}
-
-	// Track anchor class
-	private class Anchor {
-		private Paint mAnchorPaint;
-		public float position;
-
-		public Anchor() {
-			mAnchorPaint = new Paint();
-			mAnchorPaint.setColor(Color.parseColor("#ffffff"));
-		}
-
-		public boolean contains(float x) {
-			if(x > (position - dp12 - dp18) && x < (position + dp18)) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		public void draw(Canvas canvas) {
-			canvas.drawRoundRect(new RectF(position - dp12, 0, position, mHeight), dp2, dp2, mAnchorPaint);
-		}
 	}
 
 }
