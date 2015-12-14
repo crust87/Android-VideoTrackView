@@ -1,4 +1,25 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+    userOrg = 'mabi87'
+    groupId = 'com.crust87'
+    artifactId = 'video-track-view'
+    publishVersion = '1.0.0'
+    desc = 'Video Track View for Android'
+    website = 'https://github.com/crust87/Android-ImageCropper'
+    issueTracker = "${website}/issues"
+    repository = "${website}.git"
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.3.4'
+    }
+}
 
 android {
     compileSdkVersion 23

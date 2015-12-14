@@ -1,21 +1,39 @@
+/*
+ * Android-VideoTrackView
+ * https://github.com/crust87/Android-VideoTrackView
+ *
+ * Mabi
+ * crust87@gmail.com
+ * last modify 2015-12-14
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.crust87.videotrackviewsample;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.crust87.videocropview.VideoCropView;
 import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
 
     // Layout Components
-    private VideoCropView mVideoCropView;
     private VideoTrackView mVideoTrackView;
 
     // Attributes
@@ -31,19 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private void loadGUI() {
         setContentView(R.layout.activity_main);
 
-        mVideoCropView = (VideoCropView) findViewById(R.id.videoCropView);
         mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
     }
 
     private void bindEvent() {
-        mVideoCropView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mVideoCropView.start();
-            }
-        });
-
         mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
             @Override
             public void onUpdatePositionStart() {
@@ -69,9 +78,6 @@ public class MainActivity extends AppCompatActivity {
 
             originalPath = getRealPathFromURI(selectedVideoUri);
             mVideoTrackView.setVideo(originalPath);
-
-            mVideoCropView.setVideoURI(selectedVideoUri);
-            mVideoCropView.seekTo(1);
         }
     }
 
