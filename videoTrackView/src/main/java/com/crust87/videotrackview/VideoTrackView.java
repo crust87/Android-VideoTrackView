@@ -55,6 +55,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
     private float mScreenDuration = 10000f;
     private int mThumbnailPerScreen = 6;
     private float mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
+	private int mTrackPadding;
 
 	private int mWidth;						// view width
 	private int mHeight;					// view height
@@ -99,6 +100,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         mScreenDuration = 10000f;
         mThumbnailPerScreen = 6;
         mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
+		mTrackPadding = 0;
     }
 
     private void initAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -107,6 +109,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         mScreenDuration = typedArray.getFloat(R.styleable.VideoTrackView_screen_duration, 10000f);
         mThumbnailPerScreen = typedArray.getInteger(R.styleable.VideoTrackView_thumbnail_per_screen, 6);
         mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
+		mTrackPadding = typedArray.getDimensionPixelOffset(R.styleable.VideoTrackView_track_padding, 0);
     }
 
     protected void initTrackView() {
@@ -168,7 +171,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		for(int i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
 			Bitmap thumbnail = retriever.getFrameAtTime(i);
 			if(thumbnail != null) {
-				mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight));
+				mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight - (mTrackPadding * 2)));
 				thumbnail.recycle();
 			}
 		}
@@ -221,7 +224,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         thumbWidth = (int) (millisecondsPerWidth * mThumbnailDuration);
 
 		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
-		mTrack = new Track(0, 0, mVideoDurationWidth, mHeight);
+        mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
 	}
 
 	@Override
@@ -284,7 +287,6 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         invalidate();
     }
 
-
 	// Track class
 	private class Track {
 		private Paint mTrackPaint;
@@ -329,15 +331,15 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		public void draw(Canvas canvas) {
 			mCanvas.drawRect(0, 0, mWidth, mHeight, mBackgroundPaint);
 			mCanvas.drawRect(left, top, right, bottom, mTrackPaint);
-			drawBitmap();
+            drawThumbnail();
 			mCanvas.drawRect(right, 0, mWidth, mHeight, mBackgroundPaint);
 			canvas.drawBitmap(mBitmap, null, mBound, mBitmapPaint);
 		}
 
-		private void drawBitmap() {
+		private void drawThumbnail() {
             int i = 0;
 			while(i < mThumbnailList.size()) {
-				int x = (int) (left + i * thumbWidth);
+				int x = (left + i * thumbWidth);
 
 				if(x < lineBoundLeft) {
 					int next = x / -thumbWidth < 1 ? 1 : x / -thumbWidth;

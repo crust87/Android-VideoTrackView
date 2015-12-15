@@ -3,5 +3,6 @@
     <declare-styleable name="VideoTrackView">
         <attr name="screen_duration" format="float" />
         <attr name="thumbnail_per_screen" format="integer" />
+        <attr name="track_padding" format="dimension" />
     </declare-styleable>
 </resources>
