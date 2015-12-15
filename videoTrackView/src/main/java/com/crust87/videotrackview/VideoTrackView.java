@@ -32,6 +32,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -49,6 +50,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private Rect mBackgroundRect;
 	private Track mTrack;
 	private VideoTrackOverlay mVideoTrackOverlay;
+	private MediaMetadataRetriever mMediaMetadataRetriever;
 
 	// Attributes
     private float mScreenDuration;
@@ -126,10 +128,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 	public boolean setVideo(String path) {
 		mThumbnailList.clear();
-		MediaMetadataRetriever retriever = new  MediaMetadataRetriever();
-		retriever.setDataSource(path);
+		mMediaMetadataRetriever = new  MediaMetadataRetriever();
+		mMediaMetadataRetriever.setDataSource(path);
 
-		String duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+		String duration = mMediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
 
 		try {
 			mVideoDuration = Integer.parseInt(duration);
@@ -142,20 +144,61 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		}
 
 		mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
-
 		mTrack.right = mVideoDurationWidth;
 
-		// create thumbnail for draw track
-        int thumbDurationInMicro = (int) (mThumbnailDuration * 1000);
-		for(int i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
-			Bitmap thumbnail = retriever.getFrameAtTime(i);
-			if(thumbnail != null) {
-				mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight - (mTrackPadding * 2)));
-				thumbnail.recycle();
-			}
-		}
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				// create thumbnail for draw track
+				int thumbDurationInMicro = (int) (mThumbnailDuration * 1000);
+				for(int i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
+					Bitmap thumbnail = mMediaMetadataRetriever.getFrameAtTime(i);
+					if(thumbnail != null) {
+						mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight - (mTrackPadding * 2)));
+						thumbnail.recycle();
+						publishProgress();
+					}
+				}
 
-		retriever.release();
+				return null;
+			}
+
+			@Override
+			protected void onProgressUpdate(Void... values) {
+				invalidate();
+			}
+
+			@Override
+			protected void onPostExecute(Void aVoid) {
+				if(mMediaMetadataRetriever != null) {
+					mMediaMetadataRetriever.release();
+					mMediaMetadataRetriever = null;
+				}
+			}
+
+			private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
+				int sourceWidth = source.getWidth();
+				int sourceHeight = source.getHeight();
+
+				float xScale = (float) newWidth / sourceWidth;
+				float yScale = (float) newHeight / sourceHeight;
+				float scale = Math.max(xScale, yScale);
+
+				float scaledWidth = scale * sourceWidth;
+				float scaledHeight = scale * sourceHeight;
+
+				float left = (newWidth - scaledWidth) / 2;
+				float top = (newHeight - scaledHeight) / 2;
+
+				RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
+
+				Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
+				Canvas canvas = new Canvas(dest);
+				canvas.drawBitmap(source, null, targetRect, null);
+
+				return dest;
+			}
+		}.execute();
 
 		mVideoTrackOverlay.onSetVideo(mVideoDuration, mMillisecondsPerWidth);
 
@@ -195,29 +238,6 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		canvas.drawRect(mBackgroundRect, mBackgroundPaint);
 		mTrack.draw(canvas);
 		mVideoTrackOverlay.drawOverlay(canvas);
-	}
-
-	private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
-		int sourceWidth = source.getWidth();
-		int sourceHeight = source.getHeight();
-
-		float xScale = (float) newWidth / sourceWidth;
-		float yScale = (float) newHeight / sourceHeight;
-		float scale = Math.max(xScale, yScale);
-
-		float scaledWidth = scale * sourceWidth;
-		float scaledHeight = scale * sourceHeight;
-
-		float left = (newWidth - scaledWidth) / 2;
-		float top = (newHeight - scaledHeight) / 2;
-
-		RectF targetRect = new RectF(left, top, left + scaledWidth, top + scaledHeight);
-
-		Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
-		Canvas canvas = new Canvas(dest);
-		canvas.drawBitmap(source, null, targetRect, null);
-
-		return dest;
 	}
 
     public void setScreenDuration(float screenDuration) {
