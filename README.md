@@ -57,10 +57,10 @@ mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionL
 });
 ```
 
-## see VideoTrackOverlay example
-https://github.com/crust87/Android-VideoTrackView/blob/master/app/src/main/java/com/crust87/videotrackviewsample/AnchorOverlay.java
-
 ![](./screenshot_01.png)
+
+## VideoTrackOverlay Example
+https://github.com/crust87/Android-VideoTrackView/blob/master/app/src/main/java/com/crust87/videotrackviewsample/AnchorOverlay.java
 
 ## Licence
 Copyright 2015 Mabi
