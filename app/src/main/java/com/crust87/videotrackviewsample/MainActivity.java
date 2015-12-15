@@ -23,18 +23,22 @@ package com.crust87.videotrackviewsample;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 
+import com.crust87.videotrackview.AnchorVideoTrackView;
 import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
 
     // Layout Components
     private VideoTrackView mVideoTrackView;
+    private AnchorVideoTrackView mAnchorVideoTrackView;
 
     // Attributes
     private String originalPath;
@@ -43,32 +47,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         loadGUI();
-        bindEvent();
+        init();
     }
 
     private void loadGUI() {
         setContentView(R.layout.activity_main);
 
         mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
+        mAnchorVideoTrackView = (AnchorVideoTrackView) findViewById(R.id.anchorVideoTrackView);
     }
 
-    private void bindEvent() {
-        mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
-            @Override
-            public void onUpdatePositionStart() {
+    private void init() {
 
-            }
-
-            @Override
-            public void onUpdatePosition(int seek) {
-
-            }
-
-            @Override
-            public void onUpdatePositionEnd(int seek) {
-
-            }
-        });
     }
 
     @Override
@@ -78,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
             originalPath = getRealPathFromURI(selectedVideoUri);
             mVideoTrackView.setVideo(originalPath);
+            mAnchorVideoTrackView.setVideo(originalPath);
         }
     }
 
