@@ -109,7 +109,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         mScreenDuration = typedArray.getFloat(R.styleable.VideoTrackView_screen_duration, 10000f);
         mThumbnailPerScreen = typedArray.getInteger(R.styleable.VideoTrackView_thumbnail_per_screen, 6);
         mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
-		
+
 		int lDefaultTrackPadding = mContext.getResources().getDimensionPixelOffset(R.dimen.default_track_padding);
 		mTrackPadding = typedArray.getDimensionPixelOffset(R.styleable.VideoTrackView_track_padding, lDefaultTrackPadding);
     }
