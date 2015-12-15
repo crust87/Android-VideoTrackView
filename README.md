@@ -38,26 +38,9 @@ lIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 startActivityForResult(lIntent, 1000);
 ```
 
-and set image path
+and set video path
 ```java
 mVideoTrackView.setVideo(path);
-```
-
-add listener
-```java
-mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionListener() {
-    @Override
-    public void onUpdatePositionStart() {
-    }
-
-    @Override
-    public void onUpdatePosition(int seek) {
-    }
-
-    @Override
-    public void onUpdatePositionEnd(int seek) {
-    }
-});
 ```
 
 ## VideoTrackOverlay Example
