@@ -1,6 +1,9 @@
 # Android-VideoTrackView
 Android Video Track View
 
+## Screenshot
+![](./screenshot_01.png)
+
 ## Example
 
 add build.gradle<br />
@@ -56,8 +59,6 @@ mVideoTrackView.setOnUpdatePositionListener(new VideoTrackView.OnUpdatePositionL
     }
 });
 ```
-
-![](./screenshot_01.png)
 
 ## VideoTrackOverlay Example
 https://github.com/crust87/Android-VideoTrackView/blob/master/app/src/main/java/com/crust87/videotrackviewsample/AnchorOverlay.java
