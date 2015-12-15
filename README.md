@@ -8,7 +8,7 @@ Android Video Track View
 
 add build.gradle<br />
 ``` groovy
-compile 'com.crust87:video-track-view:1.1.0'
+compile 'com.crust87:video-track-view:1.1.1'
 ```
 
 append your layout xml
@@ -23,7 +23,7 @@ append your layout xml
         android:id="@+id/videoTrackView"
         android:layout_width="match_parent"
         android:layout_height="88dp"
-        app:screen_duration="10000"
+        app:screen_duration="30000"
         app:thumbnail_per_screen="6"
         app:track_padding="4dp" />
 

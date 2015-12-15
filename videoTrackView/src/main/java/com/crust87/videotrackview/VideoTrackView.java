@@ -34,6 +34,7 @@ import android.graphics.RectF;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -89,7 +90,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     private void initAttributes() {
-        mScreenDuration = 10000f;
+        mScreenDuration = 30000f;
         mThumbnailPerScreen = 6;
         mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 		mTrackPadding = mContext.getResources().getDimensionPixelOffset(R.dimen.default_track_padding);
@@ -98,7 +99,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
     private void initAttributes(Context context, AttributeSet attrs, int defStyleAttr) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.VideoTrackView, defStyleAttr, 0);
 
-        mScreenDuration = typedArray.getFloat(R.styleable.VideoTrackView_screen_duration, 10000f);
+        mScreenDuration = typedArray.getFloat(R.styleable.VideoTrackView_screen_duration, 30000f);
         mThumbnailPerScreen = typedArray.getInteger(R.styleable.VideoTrackView_thumbnail_per_screen, 6);
         mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
@@ -150,8 +151,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 			@Override
 			protected Void doInBackground(Void... params) {
 				// create thumbnail for draw track
-				int thumbDurationInMicro = (int) (mThumbnailDuration * 1000);
-				for(int i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
+				long thumbDurationInMicro = (int) (mThumbnailDuration * 1000);
+				for(long i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
 					Bitmap thumbnail = mMediaMetadataRetriever.getFrameAtTime(i);
 					if(thumbnail != null) {
 						mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight - (mTrackPadding * 2)));

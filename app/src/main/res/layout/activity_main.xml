@@ -21,7 +21,7 @@
             android:id="@+id/videoTrackView"
             android:layout_width="match_parent"
             android:layout_height="88dp"
-            app:screen_duration="10000"
+            app:screen_duration="30000"
             app:thumbnail_per_screen="6"
             app:track_padding="4dp" />
 
@@ -35,7 +35,7 @@
             android:id="@+id/anchorVideoTrackView"
             android:layout_width="match_parent"
             android:layout_height="88dp"
-            app:screen_duration="10000"
+            app:screen_duration="30000"
             app:thumbnail_per_screen="6"
             app:track_padding="4dp" />
 
