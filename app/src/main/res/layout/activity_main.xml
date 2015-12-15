@@ -30,7 +30,7 @@
             android:layout_marginTop="16dp"
             android:text="AnchorVideoTrackView" />
 
-        <com.crust87.videotrackview.AnchorVideoTrackView
+        <com.crust87.videotrackview.VideoTrackView
             android:id="@+id/anchorVideoTrackView"
             android:layout_width="match_parent"
             android:layout_height="88dp"

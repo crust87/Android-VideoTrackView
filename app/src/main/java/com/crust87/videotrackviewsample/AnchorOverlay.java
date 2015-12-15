@@ -1,4 +1,25 @@
-package com.crust87.videotrackview;
+/*
+ * Android-VideoTrackView
+ * https://github.com/crust87/Android-VideoTrackView
+ *
+ * Mabi
+ * crust87@gmail.com
+ * last modify 2015-12-15
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.crust87.videotrackviewsample;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,94 +27,67 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 
-/**
- * Created by mabi on 2015. 12. 15..
- */
-public class AnchorVideoTrackView extends VideoTrackView {
+import com.crust87.videotrackview.VideoTrackOverlay;
+import com.crust87.videotrackview.VideoTrackView;
+
+public class AnchorOverlay extends VideoTrackOverlay {
     private enum ACTION_TYPE {anchor, normal, idle}	// touch event action type
 
+    // Overlay Components
+    private Anchor mAnchor;
     private Paint mDisablePaint;
     private Rect mDisableRect;
 
-    private Anchor mAnchor;
+    // Event Listener
     private OnUpdateAnchorListener mOnUpdateAnchorListener;
 
+    // Attributes
     private int mDefaultAnchorPosition;
     private int mAnchorWidth;
     private int mAnchorRound;
     private int mAnchorArea;
 
+    // Working Variables
+    protected int currentPosition;			// current start position
     private int currentDuration;			// current duration position
     private ACTION_TYPE actionType;			// current touche event type
+    protected float pastX;					// past position x of touch event
 
-    public AnchorVideoTrackView(Context context) {
+    // Constructors
+    public AnchorOverlay(Context context) {
         super(context);
 
         mAnchor = new Anchor();
-        mDefaultAnchorPosition = getResources().getDimensionPixelOffset(R.dimen.default_anchor_position);
-        mAnchorWidth = getResources().getDimensionPixelOffset(R.dimen.anchor_width);
-        mAnchorRound = getResources().getDimensionPixelOffset(R.dimen.anchor_round);
-        mAnchorArea = getResources().getDimensionPixelOffset(R.dimen.anchor_area);
+        mDefaultAnchorPosition = context.getResources().getDimensionPixelOffset(R.dimen.default_anchor_position);
+        mAnchorWidth = context.getResources().getDimensionPixelOffset(R.dimen.anchor_width);
+        mAnchorRound = context.getResources().getDimensionPixelOffset(R.dimen.anchor_round);
+        mAnchorArea = context.getResources().getDimensionPixelOffset(R.dimen.anchor_area);
 
         mDisablePaint = new Paint(Color.parseColor("#000000"));
         mDisablePaint.setAlpha(128);
-
-    }
-
-    public AnchorVideoTrackView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        mAnchor = new Anchor();
-        mDefaultAnchorPosition = getResources().getDimensionPixelOffset(R.dimen.default_anchor_position);
-        mAnchorWidth = getResources().getDimensionPixelOffset(R.dimen.anchor_width);
-        mAnchorRound = getResources().getDimensionPixelOffset(R.dimen.anchor_round);
-        mAnchorArea = getResources().getDimensionPixelOffset(R.dimen.anchor_area);
-
-        mDisablePaint = new Paint(Color.parseColor("#000000"));
-        mDisablePaint.setAlpha(192);
-    }
-
-    public AnchorVideoTrackView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-
-        mAnchor = new Anchor();
-        mDefaultAnchorPosition = getResources().getDimensionPixelOffset(R.dimen.default_anchor_position);
-        mAnchorWidth = getResources().getDimensionPixelOffset(R.dimen.anchor_width);
-        mAnchorRound = getResources().getDimensionPixelOffset(R.dimen.anchor_round);
-        mAnchorArea = getResources().getDimensionPixelOffset(R.dimen.anchor_area);
-
-        mDisablePaint = new Paint(Color.parseColor("#000000"));
-        mDisablePaint.setAlpha(192);
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        super.surfaceChanged(holder, format, width, height);
+    public void onTrackChanged(int width, int height) {
+        super.onTrackChanged(width, height);
 
-        mDisableRect = new Rect((int) mAnchor.position, 0, mWidth, mHeight);
+        mDisableRect = new Rect((int) mAnchor.position, 0, width, height);
     }
 
     @Override
-    public boolean setVideo(String path) {
-        super.setVideo(path);
+    public void onSetVideo(int videoDuration, float millisecondsPerWidth) {
+        super.onSetVideo(videoDuration, millisecondsPerWidth);
 
         currentPosition = 0;
-        currentDuration = (int) (mDefaultAnchorPosition / millisecondsPerWidth);
-
+        currentDuration = (int) (mDefaultAnchorPosition / mMillisecondsPerWidth);
         mAnchor.position = mDefaultAnchorPosition;
-        mDisableRect.left = (int) mDefaultAnchorPosition;
-
-        invalidate();
-        return true;
+        mDisableRect.left = mDefaultAnchorPosition;
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
+    public boolean onTrackTouchEvent(VideoTrackView.Track track, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if(mOnUpdateAnchorListener != null) {
@@ -111,11 +105,11 @@ public class AnchorVideoTrackView extends VideoTrackView {
                 // do event process
                 switch(actionType) {
                     case anchor:
-                        updateAnchorPosition(event.getX() - pastX);
+                        updateAnchorPosition(track, event.getX() - pastX);
                         pastX = event.getX();
                         break;
                     case normal:
-                        updateTrackPosition((int) (event.getX() - pastX));
+                        updateTrackPosition(track, (int) (event.getX() - pastX));
                         pastX = event.getX();
                         break;
                 }
@@ -133,59 +127,53 @@ public class AnchorVideoTrackView extends VideoTrackView {
 
     // update track position
     // int x: it's actually delta x
-    private void updateTrackPosition(float x) {
+    private void updateTrackPosition(VideoTrackView.Track track, float x) {
         // check next position in boundary
-        if(mTrack.left + x > 0) {
-            x = -mTrack.left;
+        if(track.left + x > 0) {
+            x = -track.left;
         }
 
-        if(mTrack.right + x < minWidth) {
-            x = minWidth - mTrack.right;
+        if(track.right + x < 0) {
+            x = 0 - track.right;
         }
 
-        mTrack.left += x;
-        mTrack.right += x;
+        track.left += x;
+        track.right += x;
 
-        currentPosition = (int) -(mTrack.left / millisecondsPerWidth);
+        currentPosition = (int) -(track.left / mMillisecondsPerWidth);
         if(x < 0) {
             int nextDuration = mVideoDuration - currentPosition;
             currentDuration = nextDuration > currentDuration ? currentDuration : nextDuration;
-            mAnchor.position = (int) (currentDuration * millisecondsPerWidth);
+            mAnchor.position = (int) (currentDuration * mMillisecondsPerWidth);
             mDisableRect.left = (int) mAnchor.position;
         }
 
         if(mOnUpdateAnchorListener != null) {
             mOnUpdateAnchorListener.onUpdatePosition(currentPosition, currentDuration);
         }
-
-        invalidate();
     }
 
-    private void updateAnchorPosition(float x) {
+    private void updateAnchorPosition(VideoTrackView.Track track, float x) {
         // check next position in boundary
-        if(mAnchor.position + x < minWidth) {
-            x = minWidth - mAnchor.position;
+        if(mAnchor.position + x < 0) {
+            x = 0 - mAnchor.position;
         }
 
-        if(mAnchor.position + x > mTrack.right) {
-            x = mTrack.right - mAnchor.position;
+        if(mAnchor.position + x > track.right) {
+            x = track.right - mAnchor.position;
         }
 
         mAnchor.position += x;
         mDisableRect.left = (int) mAnchor.position;
 
-        currentDuration = (int) (mAnchor.position / millisecondsPerWidth);
+        currentDuration = (int) (mAnchor.position / mMillisecondsPerWidth);
         if(mOnUpdateAnchorListener != null) {
             mOnUpdateAnchorListener.onUpdatePosition(currentPosition, currentDuration);
         }
-
-        invalidate();
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
+    public void drawOverlay(Canvas canvas) {
         canvas.drawRect(mDisableRect, mDisablePaint);
         mAnchor.draw(canvas);
     }

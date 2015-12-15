@@ -23,22 +23,19 @@ package com.crust87.videotrackviewsample;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 
-import com.crust87.videotrackview.AnchorVideoTrackView;
 import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
 
     // Layout Components
     private VideoTrackView mVideoTrackView;
-    private AnchorVideoTrackView mAnchorVideoTrackView;
+    private VideoTrackView mAnchorVideoTrackView;
 
     // Attributes
     private String originalPath;
@@ -54,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
-        mAnchorVideoTrackView = (AnchorVideoTrackView) findViewById(R.id.anchorVideoTrackView);
+        mAnchorVideoTrackView = (VideoTrackView) findViewById(R.id.anchorVideoTrackView);
+
+        mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
     }
 
     private void init() {
