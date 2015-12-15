@@ -55,12 +55,11 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private int mThumbnailPerScreen;
 	private float mThumbnailDuration;
 	private int mTrackPadding;
-
 	private int mWidth;						// view width
 	private int mHeight;					// view height
 	private int mVideoDuration;				// video duration
 	private int mVideoDurationWidth;		// video duration in pixel
-	private float millisecondsPerWidth;			// milliseconds per width
+	private float mMillisecondsPerWidth;			// milliseconds per width
 	private int thumbWidth;					// one second of width in pixel
 
 	public VideoTrackView(Context context) {
@@ -142,7 +141,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 			return false;
 		}
 
-		mVideoDurationWidth = (int) (mVideoDuration * millisecondsPerWidth);
+		mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
 
 		mTrack.right = mVideoDurationWidth;
 
@@ -158,7 +157,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		retriever.release();
 
-		mVideoTrackOverlay.onSetVideo(mVideoDuration, millisecondsPerWidth);
+		mVideoTrackOverlay.onSetVideo(mVideoDuration, mMillisecondsPerWidth);
 
         invalidate();
 
@@ -175,14 +174,14 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mWidth = width;
 		mHeight = height;
 
-        millisecondsPerWidth = mWidth / mScreenDuration;
-        mVideoDurationWidth = (int) (mVideoDuration * millisecondsPerWidth);
-        thumbWidth = (int) (millisecondsPerWidth * mThumbnailDuration);
+		mMillisecondsPerWidth = mWidth / mScreenDuration;
+        mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
+        thumbWidth = (int) (mMillisecondsPerWidth * mThumbnailDuration);
 
 		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
         mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
 
-		mVideoTrackOverlay.onTrackChanged(mWidth, mHeight);
+		mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
 	}
 
 	@Override

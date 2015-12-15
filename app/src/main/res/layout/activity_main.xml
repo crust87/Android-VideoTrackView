@@ -14,6 +14,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="VideoTrackView" />
 
         <com.crust87.videotrackview.VideoTrackView
@@ -28,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="AnchorVideoTrackView" />
+            android:text="VideoTrackView With AnchorOverlay" />
 
         <com.crust87.videotrackview.VideoTrackView
             android:id="@+id/anchorVideoTrackView"

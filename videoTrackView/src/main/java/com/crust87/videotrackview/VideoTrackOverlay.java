@@ -40,7 +40,7 @@ public abstract class VideoTrackOverlay {
         mContext = context;
     }
 
-    public void onTrackChanged(int width, int height) {
+    public void onSurfaceChanged(int width, int height) {
         mWidth = width;
         mHeight = height;
     }

@@ -70,8 +70,8 @@ public class AnchorOverlay extends VideoTrackOverlay {
     }
 
     @Override
-    public void onTrackChanged(int width, int height) {
-        super.onTrackChanged(width, height);
+    public void onSurfaceChanged(int width, int height) {
+        super.onSurfaceChanged(width, height);
 
         mDisableRect = new Rect((int) mAnchor.position, 0, width, height);
     }
