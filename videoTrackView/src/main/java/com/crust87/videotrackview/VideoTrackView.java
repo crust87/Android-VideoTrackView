@@ -218,14 +218,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mWidth = width;
 		mHeight = height;
 
-		mMillisecondsPerWidth = mWidth / mScreenDuration;
-        mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
-        thumbWidth = (int) (mMillisecondsPerWidth * mThumbnailDuration);
-
-		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
-        mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
-
-		mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
+		resetTrackSettings();
 	}
 
 	@Override
@@ -241,19 +234,46 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mVideoTrackOverlay.drawOverlay(canvas);
 	}
 
+	private void resetTrackSettings() {
+		mMillisecondsPerWidth = mWidth / mScreenDuration;
+		mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
+		thumbWidth = (int) (mMillisecondsPerWidth * mThumbnailDuration);
+
+		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
+		mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
+
+		mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
+	}
+
     public void setScreenDuration(float screenDuration) {
         mScreenDuration = screenDuration;
-        mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
-        invalidate();
+		resetTrackSettings();
     }
+
+	public float getScreenDuration() {
+		return mScreenDuration;
+	}
 
     public void setThumbnailPerScreen(int thumbnailPerScreen) {
         mThumbnailPerScreen = thumbnailPerScreen;
-        mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
-        invalidate();
+		resetTrackSettings();
     }
+
+	public int getThumbnailPerScreen() {
+		return mThumbnailPerScreen;
+	}
+
+	public void setTrackPadding(int trackPadding) {
+		mTrackPadding = trackPadding;
+
+		resetTrackSettings();
+	}
+
+	public int getTrackPadding() {
+		return mTrackPadding;
+	}
 
 	public void setVideoTrackOverlay(VideoTrackOverlay videoTrackOverlay) {
 		mVideoTrackOverlay = videoTrackOverlay;

@@ -28,14 +28,17 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 
 import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
 
     // Layout Components
-    private VideoTrackView mVideoTrackView;
     private VideoTrackView mAnchorVideoTrackView;
+    private EditText mEditScreenDuration;
+    private EditText mEditThumbnailPerScreen;
+    private EditText mEditTrackPadding;
 
     // Attributes
     private String originalPath;
@@ -50,14 +53,18 @@ public class MainActivity extends AppCompatActivity {
     private void loadGUI() {
         setContentView(R.layout.activity_main);
 
-        mVideoTrackView = (VideoTrackView) findViewById(R.id.videoTrackView);
         mAnchorVideoTrackView = (VideoTrackView) findViewById(R.id.anchorVideoTrackView);
+        mEditScreenDuration = (EditText) findViewById(R.id.editScreenDuration);
+        mEditThumbnailPerScreen = (EditText) findViewById(R.id.editThumbnailPerScreen);
+        mEditTrackPadding = (EditText) findViewById(R.id.editTrackPadding);
 
         mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
     }
 
     private void init() {
-
+        mEditScreenDuration.setText(String.valueOf(mAnchorVideoTrackView.getScreenDuration()));
+        mEditThumbnailPerScreen.setText(String.valueOf(mAnchorVideoTrackView.getThumbnailPerScreen()));
+        mEditTrackPadding.setText(String.valueOf(mAnchorVideoTrackView.getTrackPadding()));
     }
 
     @Override
@@ -66,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
             Uri selectedVideoUri = data.getData();
 
             originalPath = getRealPathFromURI(selectedVideoUri);
-            mVideoTrackView.setVideo(originalPath);
             mAnchorVideoTrackView.setVideo(originalPath);
         }
     }
@@ -91,5 +97,20 @@ public class MainActivity extends AppCompatActivity {
                 cursor.close();
             }
         }
+    }
+
+    public void onScreenDurationSetClicked(View view) {
+        float newScreenDuration = Float.valueOf(mEditScreenDuration.getText().toString());
+        mAnchorVideoTrackView.setScreenDuration(newScreenDuration);
+    }
+
+    public void onThumbnailPerScreenSetClicked(View view) {
+        int newThumbnailPerScreen = Integer.valueOf(mEditThumbnailPerScreen.getText().toString());
+        mAnchorVideoTrackView.setThumbnailPerScreen(newThumbnailPerScreen);
+    }
+
+    public void onTrackPaddingSetClicked(View view) {
+        int newTrackPadding = Integer.valueOf(mEditTrackPadding.getText().toString());
+        mAnchorVideoTrackView.setTrackPadding(newTrackPadding);
     }
 }
