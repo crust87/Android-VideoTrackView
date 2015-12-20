@@ -247,6 +247,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
     public void setScreenDuration(float screenDuration) {
         mScreenDuration = screenDuration;
+		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
 		resetTrackSettings();
     }
@@ -257,6 +258,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
     public void setThumbnailPerScreen(int thumbnailPerScreen) {
         mThumbnailPerScreen = thumbnailPerScreen;
+		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
 		resetTrackSettings();
     }
