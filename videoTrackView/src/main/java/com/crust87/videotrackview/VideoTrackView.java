@@ -54,6 +54,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private MediaMetadataRetriever mMediaMetadataRetriever;
 
 	// Attributes
+	private String mPath;
     private float mScreenDuration;
 	private int mThumbnailPerScreen;
 	private float mThumbnailDuration;
@@ -62,8 +63,11 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private int mHeight;					// view height
 	private int mVideoDuration;				// video duration
 	private int mVideoDurationWidth;		// video duration in pixel
-	private float mMillisecondsPerWidth;			// milliseconds per width
+	private float mMillisecondsPerWidth;	// milliseconds per width
 	private int thumbWidth;					// one second of width in pixel
+
+	// Working Variables
+	private boolean isLoading;
 
 	public VideoTrackView(Context context) {
 		super(context);
@@ -107,6 +111,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mTrackPadding = typedArray.getDimensionPixelOffset(R.styleable.VideoTrackView_track_padding, lDefaultTrackPadding);
 
 		typedArray.recycle();
+		isLoading = false;
     }
 
     protected void initTrackView() {
@@ -128,6 +133,15 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	}
 
 	public boolean setVideo(String path) {
+		if(path == null || mThumbnailList == null) {
+			return false;
+		}
+
+		for(Bitmap b: mThumbnailList) {
+			b.recycle();
+		}
+
+		mPath = path;
 		mThumbnailList.clear();
 		mMediaMetadataRetriever = new  MediaMetadataRetriever();
 		mMediaMetadataRetriever.setDataSource(path);
@@ -146,6 +160,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
 		mTrack.right = mVideoDurationWidth;
+
+		isLoading = true;
 
 		new AsyncTask<Void, Void, Void>() {
 			@Override
@@ -175,6 +191,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 					mMediaMetadataRetriever.release();
 					mMediaMetadataRetriever = null;
 				}
+
+				isLoading = false;
 			}
 
 			private Bitmap scaleCenterCrop(Bitmap source, int newWidth, int newHeight) {
@@ -250,6 +268,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
 		resetTrackSettings();
+		setVideo(mPath);
     }
 
 	public float getScreenDuration() {
@@ -261,6 +280,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
 		resetTrackSettings();
+		setVideo(mPath);
     }
 
 	public int getThumbnailPerScreen() {
@@ -271,10 +291,15 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mTrackPadding = trackPadding;
 
 		resetTrackSettings();
+		setVideo(mPath);
 	}
 
 	public int getTrackPadding() {
 		return mTrackPadding;
+	}
+
+	public boolean isLoading() {
+		return isLoading;
 	}
 
 	public void setVideoTrackOverlay(VideoTrackOverlay videoTrackOverlay) {
