@@ -103,23 +103,29 @@ public class MainActivity extends AppCompatActivity {
         float newScreenDuration = Float.valueOf(mEditScreenDuration.getText().toString());
 
         if(!mAnchorVideoTrackView.isLoading()) {
-            mAnchorVideoTrackView.setScreenDuration(newScreenDuration);
+            mAnchorVideoTrackView.cancelLoadTask();
         }
+
+        mAnchorVideoTrackView.setScreenDuration(newScreenDuration);
     }
 
     public void onThumbnailPerScreenSetClicked(View view) {
         int newThumbnailPerScreen = Integer.valueOf(mEditThumbnailPerScreen.getText().toString());
 
         if(!mAnchorVideoTrackView.isLoading()) {
-            mAnchorVideoTrackView.setThumbnailPerScreen(newThumbnailPerScreen);
+            mAnchorVideoTrackView.cancelLoadTask();
         }
+
+        mAnchorVideoTrackView.setThumbnailPerScreen(newThumbnailPerScreen);
     }
 
     public void onTrackPaddingSetClicked(View view) {
         int newTrackPadding = Integer.valueOf(mEditTrackPadding.getText().toString());
 
         if(!mAnchorVideoTrackView.isLoading()) {
-            mAnchorVideoTrackView.setTrackPadding(newTrackPadding);
+            mAnchorVideoTrackView.cancelLoadTask();
         }
+
+        mAnchorVideoTrackView.setTrackPadding(newTrackPadding);
     }
 }
