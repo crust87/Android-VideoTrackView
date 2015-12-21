@@ -52,6 +52,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private Track mTrack;
 	private VideoTrackOverlay mVideoTrackOverlay;
 	private MediaMetadataRetriever mMediaMetadataRetriever;
+	private OnTrackListener mOnTrackListener;
 
 	// Attributes
 	private String mPath;
@@ -67,6 +68,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private int thumbWidth;					// one second of width in pixel
 
 	// Working Variables
+	private AsyncTask<Void, Void, Void> mThumbnailTask;
 	private boolean isLoading;
 
 	public VideoTrackView(Context context) {
@@ -163,12 +165,26 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		isLoading = true;
 
-		new AsyncTask<Void, Void, Void>() {
+		mThumbnailTask = new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+
+				if(mOnTrackListener != null) {
+					mOnTrackListener.onLoadStart();
+				}
+			}
+
 			@Override
 			protected Void doInBackground(Void... params) {
 				// create thumbnail for draw track
 				long thumbDurationInMicro = (int) (mThumbnailDuration * 1000);
 				for(long i = 0; i < mVideoDuration * 1000; i += thumbDurationInMicro) {
+					if(isCancelled()) {
+						return null;
+					}
+
 					Bitmap thumbnail = mMediaMetadataRetriever.getFrameAtTime(i);
 					if(thumbnail != null) {
 						mThumbnailList.add(scaleCenterCrop(thumbnail, thumbWidth, mHeight - (mTrackPadding * 2)));
@@ -187,10 +203,31 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 			@Override
 			protected void onPostExecute(Void aVoid) {
+				finishTask();
+
+				if(mOnTrackListener != null) {
+					mOnTrackListener.onLoadFinish();
+				}
+			}
+
+			@Override
+			protected void onCancelled() {
+				super.onCancelled();
+
+				finishTask();
+
+				if(mOnTrackListener != null) {
+					mOnTrackListener.onLoadCancel();
+				}
+			}
+
+			private void finishTask() {
 				if(mMediaMetadataRetriever != null) {
 					mMediaMetadataRetriever.release();
 					mMediaMetadataRetriever = null;
 				}
+
+				mThumbnailTask = null;
 
 				isLoading = false;
 			}
@@ -217,7 +254,9 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 				return dest;
 			}
-		}.execute();
+		};
+
+		mThumbnailTask.execute();
 
 		mVideoTrackOverlay.onSetVideo(mVideoDuration, mMillisecondsPerWidth);
 
@@ -250,6 +289,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		canvas.drawRect(mBackgroundRect, mBackgroundPaint);
 		mTrack.draw(canvas);
 		mVideoTrackOverlay.drawOverlay(canvas);
+	}
+
+	public void cancelLoadTask() {
+		mThumbnailTask.cancel(true);
 	}
 
 	private void resetTrackSettings() {
@@ -374,5 +417,15 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 				i++;
 			}
 		}
+	}
+
+	public void setOnTrackListener(OnTrackListener onTrackListener) {
+		mOnTrackListener = onTrackListener;
+	}
+
+	public interface OnTrackListener {
+		void onLoadStart();
+		void onLoadFinish();
+		void onLoadCancel();
 	}
 }
