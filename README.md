@@ -8,7 +8,7 @@ Android Video Track View
 
 add build.gradle<br />
 ``` groovy
-compile 'com.crust87:video-track-view:1.1.1'
+compile 'com.crust87:video-track-view:1.2.0'
 ```
 
 append your layout xml
