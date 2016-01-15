@@ -46,7 +46,7 @@ mVideoTrackView.setVideo(path);
 ## VideoTrackOverlay Example
 https://github.com/crust87/Android-VideoTrackView/blob/master/app/src/main/java/com/crust87/videotrackviewsample/AnchorOverlay.java
 
-## Licence
+## License
 Copyright 2015 Mabi
 
 Licensed under the Apache License, Version 2.0 (the "License");<br/>
