@@ -5,7 +5,7 @@ publish {
     userOrg = 'mabi87'
     groupId = 'com.crust87'
     artifactId = 'video-track-view'
-    publishVersion = '1.2.0'
+    publishVersion = '1.2.1'
     desc = 'Video Track View for Android'
     website = 'https://github.com/crust87/Android-ImageCropper'
     issueTracker = "${website}/issues"
@@ -28,8 +28,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 5
-        versionName "1.2.0"
+        versionCode 6
+        versionName "1.2.1"
     }
     buildTypes {
         release {

@@ -56,6 +56,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 	// Attributes
 	private String mPath;
+	private boolean isViewCreated;
     private float mScreenDuration;
 	private int mThumbnailPerScreen;
 	private float mThumbnailDuration;
@@ -124,6 +125,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         mBackgroundPaint.setColor(Color.parseColor("#222222"));
 		mVideoTrackOverlay = new DefaultOverlay(mContext);
         setWillNotDraw(false);
+
+		isViewCreated = false;
     }
 
 	@Override
@@ -135,6 +138,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	}
 
 	public boolean setVideo(String path) {
+		mPath = path;
+
 		if(path == null || mThumbnailList == null) {
 			return false;
 		}
@@ -143,7 +148,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 			b.recycle();
 		}
 
-		mPath = path;
+		if(!isViewCreated) {
+			return false;
+		}
+
 		mThumbnailList.clear();
 		mMediaMetadataRetriever = new  MediaMetadataRetriever();
 		mMediaMetadataRetriever.setDataSource(path);
@@ -275,11 +283,13 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mWidth = width;
 		mHeight = height;
 
-		resetTrackSettings();
+		initTrackSettings();
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
+		mPath = null;
+		isViewCreated = false;
 	}
 
 	@Override
@@ -295,7 +305,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mThumbnailTask.cancel(true);
 	}
 
-	private void resetTrackSettings() {
+	private void initTrackSettings() {
 		mMillisecondsPerWidth = mWidth / mScreenDuration;
 		mVideoDurationWidth = (int) (mVideoDuration * mMillisecondsPerWidth);
 		thumbWidth = (int) (mMillisecondsPerWidth * mThumbnailDuration);
@@ -304,14 +314,19 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
 
 		mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
+
+		isViewCreated = true;
+
+		if(mPath != null) {
+			setVideo(mPath);
+		}
 	}
 
     public void setScreenDuration(float screenDuration) {
         mScreenDuration = screenDuration;
 		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
-		resetTrackSettings();
-		setVideo(mPath);
+		initTrackSettings();
     }
 
 	public float getScreenDuration() {
@@ -322,8 +337,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
         mThumbnailPerScreen = thumbnailPerScreen;
 		mThumbnailDuration = mScreenDuration / mThumbnailPerScreen;
 
-		resetTrackSettings();
-		setVideo(mPath);
+		initTrackSettings();
     }
 
 	public int getThumbnailPerScreen() {
@@ -333,8 +347,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	public void setTrackPadding(int trackPadding) {
 		mTrackPadding = trackPadding;
 
-		resetTrackSettings();
-		setVideo(mPath);
+		initTrackSettings();
 	}
 
 	public int getTrackPadding() {
