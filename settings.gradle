@@ -1,1 +1,1 @@
-include ':app', ':videoTrackView'
+include ':sample', ':library'
