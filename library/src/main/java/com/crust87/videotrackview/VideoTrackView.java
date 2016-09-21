@@ -254,8 +254,8 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 			isEnd = true;
 		}
 
-		if(track.right + x < 0) {
-			x = 0 - track.right;
+		if((track.right - mWidth) + x < 0) {
+			x = 0 - (track.right - mWidth);
 
 			isEnd = true;
 		}
