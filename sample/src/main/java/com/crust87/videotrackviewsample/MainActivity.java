@@ -41,18 +41,33 @@ import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
 
+    /*
+    Constants
+     */
+    private static final int ACTIVITY_REQUEST_VIDEO = 1000;
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 0;
 
+    /*
+    Activity
+     */
     private Activity mActivity;
 
-    // Layout Components
+    /*
+    Layout Components
+     */
     private VideoTrackView mAnchorVideoTrackView;
     private EditText mEditScreenDuration;
     private EditText mEditThumbnailPerScreen;
     private EditText mEditTrackPadding;
 
-    // Attributes
+    /*
+    Attributes
+     */
     private String originalPath;
+
+    /*
+    Lifecycel Method START
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +76,35 @@ public class MainActivity extends AppCompatActivity {
 
         loadGUI();
         init();
+    }
+    /*
+    Lifecycel Method END
+     */
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ACTIVITY_REQUEST_VIDEO && resultCode == RESULT_OK) {
+            Uri selectedVideoUri = data.getData();
+
+            originalPath = getRealPathFromURI(selectedVideoUri);
+            mAnchorVideoTrackView.setVideo(originalPath);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent lIntent = new Intent(Intent.ACTION_PICK);
+                    lIntent.setType("video/*");
+                    lIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivityForResult(lIntent, ACTIVITY_REQUEST_VIDEO);
+                } else {
+                    Toast.makeText(mActivity, "APPLICATION NEEDS PERMISSION!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     private void loadGUI() {
@@ -80,32 +124,6 @@ public class MainActivity extends AppCompatActivity {
         mEditTrackPadding.setText(String.valueOf(mAnchorVideoTrackView.getTrackPadding()));
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1000 && resultCode == RESULT_OK) {
-            Uri selectedVideoUri = data.getData();
-
-            originalPath = getRealPathFromURI(selectedVideoUri);
-            mAnchorVideoTrackView.setVideo(originalPath);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Intent lIntent = new Intent(Intent.ACTION_PICK);
-                    lIntent.setType("video/*");
-                    lIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivityForResult(lIntent, 1000);
-                } else {
-                    Toast.makeText(mActivity, "APPLICATION NEEDS PERMISSION!", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
-
     public void onButtonLoadClick(View v) {
         if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
@@ -113,18 +131,24 @@ public class MainActivity extends AppCompatActivity {
             Intent lIntent = new Intent(Intent.ACTION_PICK);
             lIntent.setType("video/*");
             lIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivityForResult(lIntent, 1000);
+            startActivityForResult(lIntent, ACTIVITY_REQUEST_VIDEO);
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri) {
+    private String getRealPathFromURI(Uri contentUri) {
         Cursor cursor = null;
+
         try {
             String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = getApplicationContext().getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
+            cursor = mActivity.getContentResolver().query(contentUri, proj, null, null, null);
+
+            if (cursor != null) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                return cursor.getString(columnIndex);
+            } else {
+                return null;
+            }
         } finally {
             if (cursor != null) {
                 cursor.close();
