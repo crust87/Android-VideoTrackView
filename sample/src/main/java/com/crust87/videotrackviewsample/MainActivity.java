@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         mEditThumbnailPerScreen = (EditText) findViewById(R.id.editThumbnailPerScreen);
         mEditTrackPadding = (EditText) findViewById(R.id.editTrackPadding);
 
-        mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
+//        mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
     }
 
     private void init() {
