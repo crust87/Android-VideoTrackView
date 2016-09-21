@@ -173,7 +173,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 				break;
 			case MotionEvent.ACTION_CANCEL:
 			case MotionEvent.ACTION_UP:
-				mAutoScrollRunnable.start();
+//				mAutoScrollRunnable.start();
 				recycleVelocityTracker();
 				break;
 		}
