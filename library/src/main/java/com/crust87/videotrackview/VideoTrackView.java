@@ -60,6 +60,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	private MediaMetadataRetriever mMediaMetadataRetriever;
 	private OnTrackListener mOnTrackListener;
 	private VelocityTracker mVelocityTracker;
+	private VideoTrackOverlay mVideoTrackOverlay;
 
 	/*
 	Attributes
@@ -149,6 +150,14 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if (mVideoTrackOverlay != null) {
+			if (mVideoTrackOverlay.onTrackTouchEvent(mTrack, event)) {
+				invalidate();
+
+				return true;
+			}
+		}
+
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				pastX = event.getX();
@@ -425,7 +434,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		canvas.drawRect(mBackgroundRect, mBackgroundPaint);
 		mTrack.draw(canvas);
-		//mVideoTrackOverlay.drawOverlay(canvas);
+
+		if (mVideoTrackOverlay != null) {
+			mVideoTrackOverlay.drawOverlay(canvas);
+		}
 	}
 
 	public void cancelLoadTask() {
@@ -440,7 +452,9 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 		mBackgroundRect = new Rect(0, 0, mWidth, mHeight);
 		mTrack = new Track(0, mTrackPadding, mVideoDurationWidth, mHeight - mTrackPadding);
 
-		//mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
+		if (mVideoTrackOverlay != null) {
+			mVideoTrackOverlay.onSurfaceChanged(mWidth, mHeight);
+		}
 
 		isViewCreated = true;
 
@@ -486,7 +500,7 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 	}
 
 	public void setVideoTrackOverlay(VideoTrackOverlay videoTrackOverlay) {
-		// mVideoTrackOverlay = videoTrackOverlay;
+		 mVideoTrackOverlay = videoTrackOverlay;
 	}
 
 	// Track class

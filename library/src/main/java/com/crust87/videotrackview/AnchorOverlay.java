@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.crust87.videotrackviewsample;
+package com.crust87.videotrackview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -28,9 +28,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.MotionEvent;
-
-import com.crust87.videotrackview.VideoTrackOverlay;
-import com.crust87.videotrackview.VideoTrackView;
 
 public class AnchorOverlay extends VideoTrackOverlay {
     private enum ACTION_TYPE {anchor, normal, idle}	// touch event action type
@@ -103,16 +100,11 @@ public class AnchorOverlay extends VideoTrackOverlay {
                 }
             case MotionEvent.ACTION_MOVE:
                 // do event process
-                switch(actionType) {
-                    case anchor:
-                        updateAnchorPosition(track, event.getX() - pastX);
-                        pastX = event.getX();
-                        break;
-                    case normal:
-                        updateTrackPosition(track, (int) (event.getX() - pastX));
-                        pastX = event.getX();
-                        break;
+                if (actionType == ACTION_TYPE.anchor) {
+                    updateAnchorPosition(track, event.getX() - pastX);
+                    pastX = event.getX();
                 }
+
                 break;
             case MotionEvent.ACTION_UP:
                 if(mOnUpdateAnchorListener != null) {
@@ -122,35 +114,7 @@ public class AnchorOverlay extends VideoTrackOverlay {
                 actionType = ACTION_TYPE.idle;
         }
 
-        return true;
-    }
-
-    // update track position
-    // int x: it's actually delta x
-    private void updateTrackPosition(VideoTrackView.Track track, float x) {
-        // check next position in boundary
-        if(track.left + x > 0) {
-            x = -track.left;
-        }
-
-        if(track.right + x < 0) {
-            x = 0 - track.right;
-        }
-
-        track.left += x;
-        track.right += x;
-
-        currentPosition = (int) -(track.left / mMillisecondsPerWidth);
-        if(x < 0) {
-            int nextDuration = mVideoDuration - currentPosition;
-            currentDuration = nextDuration > currentDuration ? currentDuration : nextDuration;
-            mAnchor.position = (int) (currentDuration * mMillisecondsPerWidth);
-            mDisableRect.left = (int) mAnchor.position;
-        }
-
-        if(mOnUpdateAnchorListener != null) {
-            mOnUpdateAnchorListener.onUpdatePosition(currentPosition, currentDuration);
-        }
+        return actionType == ACTION_TYPE.anchor;
     }
 
     private void updateAnchorPosition(VideoTrackView.Track track, float x) {

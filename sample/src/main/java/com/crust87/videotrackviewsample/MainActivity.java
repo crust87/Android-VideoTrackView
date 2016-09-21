@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.crust87.videotrackview.AnchorOverlay;
 import com.crust87.videotrackview.VideoTrackView;
 
 public class MainActivity extends AppCompatActivity {
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         mEditThumbnailPerScreen = (EditText) findViewById(R.id.editThumbnailPerScreen);
         mEditTrackPadding = (EditText) findViewById(R.id.editTrackPadding);
 
-//        mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
+        mAnchorVideoTrackView.setVideoTrackOverlay(new AnchorOverlay(getApplicationContext()));
     }
 
     private void init() {
