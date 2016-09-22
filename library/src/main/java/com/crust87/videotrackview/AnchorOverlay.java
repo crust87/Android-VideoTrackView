@@ -27,15 +27,20 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class AnchorOverlay extends VideoTrackOverlay {
-    private enum ACTION_TYPE {anchor, normal, idle}	// touch event action type
+    private enum ACTION_TYPE {anchorFront, anchorRear, normal, idle}	// touch event action type
 
     // Overlay Components
-    private Anchor mAnchor;
+    private Anchor mAnchorFront;
+    private Rect mDisableRectFront;
+
+    private Anchor mAnchorRear;
+    private Rect mDisableRectRear;
+
     private Paint mDisablePaint;
-    private Rect mDisableRect;
 
     // Event Listener
     private OnUpdateAnchorListener mOnUpdateAnchorListener;
@@ -56,7 +61,8 @@ public class AnchorOverlay extends VideoTrackOverlay {
     public AnchorOverlay(Context context) {
         super(context);
 
-        mAnchor = new Anchor();
+        mAnchorFront = new Anchor();
+        mAnchorRear = new Anchor();
         mDefaultAnchorPosition = context.getResources().getDimensionPixelOffset(R.dimen.default_anchor_position);
         mAnchorWidth = context.getResources().getDimensionPixelOffset(R.dimen.anchor_width);
         mAnchorRound = context.getResources().getDimensionPixelOffset(R.dimen.anchor_round);
@@ -70,17 +76,24 @@ public class AnchorOverlay extends VideoTrackOverlay {
     public void onSurfaceChanged(int width, int height) {
         super.onSurfaceChanged(width, height);
 
-        mDisableRect = new Rect((int) mAnchor.position, 0, width, height);
+        mDisableRectFront = new Rect(0, 0, (int) mAnchorFront.position, height);
+        mDisableRectRear = new Rect((int) mAnchorRear.position, 0, width, height);
     }
 
     @Override
-    public void onSetVideo(int videoDuration, float millisecondsPerWidth) {
-        super.onSetVideo(videoDuration, millisecondsPerWidth);
+    public void onSetVideo(float millisecondsPerWidth) {
+        super.onSetVideo(millisecondsPerWidth);
 
         currentPosition = 0;
         currentDuration = (int) (mDefaultAnchorPosition / mMillisecondsPerWidth);
-        mAnchor.position = mDefaultAnchorPosition;
-        mDisableRect.left = mDefaultAnchorPosition;
+
+        mAnchorFront.position = mDefaultAnchorPosition;
+        mAnchorRear.position = mWidth - mDefaultAnchorPosition;
+
+        Log.d("TEST", "mDefaultAnchorPosition " + mDefaultAnchorPosition + " mWidth " + mWidth);
+
+        mDisableRectFront.right = mDefaultAnchorPosition;
+        mDisableRectRear.left = mWidth - mDefaultAnchorPosition;
     }
 
     @Override
@@ -93,17 +106,22 @@ public class AnchorOverlay extends VideoTrackOverlay {
                 pastX = event.getX();
 
                 // check event type
-                if(mAnchor.contains(event.getX())) {
-                    actionType = ACTION_TYPE.anchor;
+                if(mAnchorFront.contains(event.getX())) {
+                    actionType = ACTION_TYPE.anchorFront;
+                } else if(mAnchorRear.contains(event.getX())) {
+                    actionType = ACTION_TYPE.anchorRear;
                 } else {
                     actionType = ACTION_TYPE.normal;
                 }
             case MotionEvent.ACTION_MOVE:
                 // do event process
-                if (actionType == ACTION_TYPE.anchor) {
-                    updateAnchorPosition(track, event.getX() - pastX);
-                    pastX = event.getX();
+                if (actionType == ACTION_TYPE.anchorFront) {
+                    updateAnchorPosition(track, mAnchorFront, event.getX() - pastX);
+                } else if (actionType == ACTION_TYPE.anchorRear) {
+                    updateAnchorPosition(track, mAnchorRear, event.getX() - pastX);
                 }
+
+                pastX = event.getX();
 
                 break;
             case MotionEvent.ACTION_UP:
@@ -114,23 +132,28 @@ public class AnchorOverlay extends VideoTrackOverlay {
                 actionType = ACTION_TYPE.idle;
         }
 
-        return actionType == ACTION_TYPE.anchor;
+        return actionType == ACTION_TYPE.anchorFront || actionType == ACTION_TYPE.anchorRear;
     }
 
-    private void updateAnchorPosition(VideoTrackView.Track track, float x) {
+    private void updateAnchorPosition(VideoTrackView.Track track, Anchor anchor, float x) {
         // check next position in boundary
-        if(mAnchor.position + x < 0) {
-            x = 0 - mAnchor.position;
+        if(anchor.position + x < 0) {
+            x = 0 - anchor.position;
         }
 
-        if(mAnchor.position + x > track.right) {
-            x = track.right - mAnchor.position;
+        if(anchor.position + x > track.right) {
+            x = track.right - anchor.position;
         }
 
-        mAnchor.position += x;
-        mDisableRect.left = (int) mAnchor.position;
+        anchor.position += x;
 
-        currentDuration = (int) (mAnchor.position / mMillisecondsPerWidth);
+        if (actionType == ACTION_TYPE.anchorFront) {
+            mDisableRectFront.right = (int) anchor.position;
+        } else {
+            mDisableRectRear.left = (int) anchor.position;
+        }
+
+        currentDuration = (int) (anchor.position / mMillisecondsPerWidth);
         if(mOnUpdateAnchorListener != null) {
             mOnUpdateAnchorListener.onUpdatePosition(currentPosition, currentDuration);
         }
@@ -138,8 +161,10 @@ public class AnchorOverlay extends VideoTrackOverlay {
 
     @Override
     public void drawOverlay(Canvas canvas) {
-        canvas.drawRect(mDisableRect, mDisablePaint);
-        mAnchor.draw(canvas);
+        canvas.drawRect(mDisableRectFront, mDisablePaint);
+        canvas.drawRect(mDisableRectRear, mDisablePaint);
+        mAnchorFront.draw(canvas);
+        mAnchorRear.draw(canvas);
     }
 
     // Track anchor class

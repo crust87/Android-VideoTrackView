@@ -33,7 +33,6 @@ public abstract class VideoTrackOverlay {
     // Attributes
     protected int mWidth;
     protected int mHeight;
-    protected int mVideoDuration;
     protected float mMillisecondsPerWidth;
 
     public VideoTrackOverlay(Context context) {
@@ -45,8 +44,7 @@ public abstract class VideoTrackOverlay {
         mHeight = height;
     }
 
-    public void onSetVideo(int videoDuration, float millisecondsPerWidth) {
-        mVideoDuration = videoDuration;
+    public void onSetVideo(float millisecondsPerWidth) {
         mMillisecondsPerWidth = millisecondsPerWidth;
     }
 

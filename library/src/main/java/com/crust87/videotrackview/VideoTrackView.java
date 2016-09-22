@@ -458,6 +458,10 @@ public class VideoTrackView extends SurfaceView implements SurfaceHolder.Callbac
 
 		isViewCreated = true;
 
+		if (mVideoTrackOverlay != null) {
+			mVideoTrackOverlay.onSetVideo(mMillisecondsPerWidth);
+		}
+
 		if(mPath != null) {
 			setVideo(mPath);
 		}
